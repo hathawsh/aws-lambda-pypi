@@ -1,16 +1,11 @@
 
-variable "pypicloud_bucket" {
+variable "package_bucket" {
   type = string
   description = "Name of the S3 bucket where pypi packages are to be stored"
 }
 
 variable "region" {
   type = string
-}
-
-variable "pypicloud_user" {
-  type = string
-  description = "Name of the S3 bucket user"
 }
 
 variable "log_group" {
@@ -56,8 +51,8 @@ resource "aws_iam_policy" "pypicloud_rw" {
         "s3:GetObjectVersion"
       ],
       "Resource": [
-        "arn:aws:s3:::${var.pypicloud_bucket}/*",
-        "arn:aws:s3:::${var.pypicloud_bucket}"
+        "arn:aws:s3:::${var.package_bucket}/*",
+        "arn:aws:s3:::${var.package_bucket}"
       ]
     }
   ]
@@ -139,7 +134,11 @@ resource "aws_lambda_function" "pypicloud" {
   environment {
     variables = {
       "PYPICLOUD_CONF_REGION" = var.region
-      "PYPICLOUD_CONF_SECRET_ID" = "pypicloud_server_ini"
+      "ENV_SECRET_ID" = aws_secretsmanager_secret.env.arn
+      "AUTH_SECRET_ID" = aws_secretsmanager_secret.auth.arn
+      "BUCKET" = var.package_bucket
+      "BUCKET_REGION" = var.region
+      "DYNAMO_REGION" = var.region
     }
   }
 
@@ -149,7 +148,7 @@ resource "aws_lambda_function" "pypicloud" {
 }
 
 resource "aws_s3_bucket" "pypicloud" {
-  bucket = var.pypicloud_bucket
+  bucket = var.package_bucket
   versioning {
     enabled = true
   }
@@ -164,14 +163,14 @@ resource "aws_s3_bucket_public_access_block" "pypicloud" {
   restrict_public_buckets = true
 }
 
-resource "aws_secretsmanager_secret" "server_ini" {
-  name = "pypicloud_server_ini"
+resource "aws_secretsmanager_secret" "env" {
+  name = "pypicloud_env"
   recovery_window_in_days = 30
-  description = "server.ini for pypicloud"
+  description = "Secret env vars for the pypicloud Lambda function"
 }
 
-resource "aws_secretsmanager_secret_policy" "server_ini" {
-  secret_arn = aws_secretsmanager_secret.server_ini.arn
+resource "aws_secretsmanager_secret_policy" "env" {
+  secret_arn = aws_secretsmanager_secret.env.arn
   policy = <<POLICY
 {
   "Version" : "2012-10-17",
@@ -180,7 +179,7 @@ resource "aws_secretsmanager_secret_policy" "server_ini" {
     "Principal" : {
       "AWS" : "${aws_iam_role.pypicloud.arn}"
     },
-    "Action" : "secretsmanager:GetSecretValue",
+    "Action" : [ "secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue" ],
     "Resource" : "*"
   } ]
 }
@@ -291,7 +290,7 @@ resource "aws_dynamodb_table" "PackageSummary" {
 }
 
 resource "aws_iam_policy" "pypicloud_dynamo" {
-  name = "${var.pypicloud_user}_dynamo"
+  name = "pypicloud_dynamo"
   policy = <<POLICY
 {
   "Version": "2012-10-17",
