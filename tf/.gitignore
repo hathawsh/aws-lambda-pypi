@@ -1,3 +1,2 @@
 .terraform
-terraform.tfstate
-terraform.tfstate.*
+remote-state.tf
