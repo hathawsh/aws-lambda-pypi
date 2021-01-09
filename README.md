@@ -141,3 +141,28 @@ terraform {
 
 Run `terraform init` to migrate the local state to the storage bucket, then
 use `terraform plan` to ensure Terraform is still working as intended.
+
+## Security
+
+This project takes the following security precautions.
+
+- The session keys are auto-generated and stored in a secret.
+
+- The server configuration file, which contains the session keys, is generated
+  on the fly to minimize the possibility of exposure.
+
+- The lambda function runs with a role limited to accessing only what it
+  needs.
+
+- PyPICloud is configured to display no packages to unauthenticated users.
+
+Please submit an issue if you discover that these precautions are not being
+applied correctly or if you are aware of other security precautions that
+should be implemented.
+
+## Scope
+
+This project is not intended to be a framework. If the project stops working
+due to changes in AWS, Terraform, Python libraries, etc., then let's fix it,
+but if you want to enable LDAP, add a plugin, or customize in a way that
+doesn't apply generally, you probably ought to fork the project instead.
