@@ -1,2 +1,3 @@
 .terraform
 remote-state.tf
+*.auto.tfvars
