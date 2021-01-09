@@ -126,7 +126,7 @@ team.
 
 Create a new S3 storage bucket (or reuse one where you've already stored
 Terraform state.) In the `tf` folder, create a file called `remote-state.tf`.
-Use the following template, replaing `MY-TFSTATE-BUCKET` with the name of your
+Use the following template, replacing `MY-TFSTATE-BUCKET` with the name of your
 bucket:
 
 ```
