@@ -166,3 +166,10 @@ This project is not intended to be a framework. If the project stops working
 due to changes in AWS, Terraform, Python libraries, etc., then let's fix it,
 but if you want to enable LDAP, add a plugin, or customize in a way that
 doesn't apply generally, you probably ought to fork the project instead.
+
+## Troubleshooting
+
+- 10 MB limit: AWS API Gateway has a fixed 10 MB limit. If the limit keeps you
+  from uploading a package, one way around it is to temporarily run PyPICloud
+  on your own box, using almost the same .ini file as the Lambda function uses.
+  There is an "upload" button in the PyPICloud UI.

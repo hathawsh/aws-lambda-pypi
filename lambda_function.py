@@ -44,7 +44,7 @@ level = INFO
 handlers = stdout
 
 [handler_stdout]
-class = handlers.StreamHandler
+class = StreamHandler
 args = (sys.stdout,)
 level = NOTSET
 formatter = generic
